@@ -18,6 +18,9 @@ public class SelectorHttpServer extends NanoHTTPD {
 	
 	public static final String CLASS_NAME = "class_name";
 	public static final String RESOURCE_ID = "resource_id";
+	
+	public static final String MIME_JSON = "application/json";
+
 
 
 	public SelectorHttpServer(int port) {
@@ -49,7 +52,8 @@ public class SelectorHttpServer extends NanoHTTPD {
 		} catch (UiObjectNotFoundException e) {
 			return UI_OBJECT_NOT_FOUND_ERROR;
 		}
-		return new Response(responseObject.toString());
+		return new Response(
+		    Response.Status.ACCEPTED, MIME_JSON, responseObject.toString());
 	}
 	
 	@Override
@@ -59,7 +63,8 @@ public class SelectorHttpServer extends NanoHTTPD {
 			synchronized (waitLock) {
 				waitLock.notify();
 			}
-			return new Response("Server stopped.");
+			return new Response(
+			    Response.Status.ACCEPTED, MIME_PLAINTEXT, "Server stopped.");
 		} else if ("GET".equals(session.getMethod())){
 			Map<String, String> parms = session.getParms();
 			if (parms.size() != 1) {
@@ -70,14 +75,11 @@ public class SelectorHttpServer extends NanoHTTPD {
 			String selectorType = entry.getKey();
 			String selectorValue = entry.getValue();
 			UiObject object = null; 
-			switch (selectorType) {
-			case CLASS_NAME:
+			if (CLASS_NAME.equals(selectorType)) {			
 				object = new UiObject(new UiSelector().className(selectorValue));
-				break;
-			case RESOURCE_ID:
+			} else if (RESOURCE_ID.equals(selectorType)) {
 				object = new UiObject(new UiSelector().resourceId(selectorValue));
-				break;
-			default:
+			} else {
 				return UNSUPPORTED_ERROR;
 			}
 			return GetResponseFromSelectedUiObject(object);

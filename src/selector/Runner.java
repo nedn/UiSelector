@@ -11,16 +11,18 @@ public class Runner extends UiAutomatorTestCase {
 		super.setUp();
 		String portStringValue = getParams().getString("PORT");
 		int port = DEFAULT_PORT;
-		if (!portStringValue.isEmpty()) {
+		if (portStringValue != null) {
 			port = Integer.parseInt(portStringValue);
 		}
 		server = new SelectorHttpServer(port);
 		server.start();
+		System.out.println("Server started");
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 		server.stop();
+		System.out.println("Server stopped");
 		server = null;
 		super.tearDown();
 	}
